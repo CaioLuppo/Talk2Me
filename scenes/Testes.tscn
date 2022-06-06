@@ -7,10 +7,6 @@
 atlas = ExtResource( 1 )
 region = Rect2( 0, 0, 40, 40 )
 
-[sub_resource type="AtlasTexture" id=1]
-atlas = ExtResource( 1 )
-region = Rect2( 0, 0, 40, 40 )
-
 [sub_resource type="AtlasTexture" id=2]
 atlas = ExtResource( 1 )
 region = Rect2( 40, 0, 40, 40 )
@@ -39,6 +35,10 @@ region = Rect2( 240, 0, 40, 40 )
 atlas = ExtResource( 1 )
 region = Rect2( 280, 0, 40, 40 )
 
+[sub_resource type="AtlasTexture" id=1]
+atlas = ExtResource( 1 )
+region = Rect2( 0, 0, 40, 40 )
+
 [sub_resource type="SpriteFrames" id=9]
 animations = [ {
 "frames": [ SubResource( 11 ) ],
@@ -46,7 +46,7 @@ animations = [ {
 "name": "idle",
 "speed": 5.0
 }, {
-"frames": [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ), SubResource( 7 ), SubResource( 8 ) ],
+"frames": [ SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ), SubResource( 7 ), SubResource( 8 ), SubResource( 1 ) ],
 "loop": true,
 "name": "down",
 "speed": 8.0
@@ -65,7 +65,8 @@ script = ExtResource( 2 )
 [node name="sprite" type="AnimatedSprite" parent="Player"]
 scale = Vector2( 5, 5 )
 frames = SubResource( 9 )
-animation = "idle"
+animation = "down"
+frame = 1
 
 [node name="colisor" type="CollisionShape2D" parent="Player"]
 shape = SubResource( 10 )

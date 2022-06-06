@@ -7,10 +7,6 @@ func _process(delta):
 		idle()
 
 func walking():
-	var timer = Timer.new()
-	timer.time_left = 0.2
-	timer.start()
-	yield(timer, "timeout")
 	position.y += 2
 	$sprite.play('down')
 
