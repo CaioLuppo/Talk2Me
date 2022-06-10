@@ -3,9 +3,9 @@ extends KinematicBody2D
 var speed = Vector2()
 
 var current_state := 0 # Estado atual
-enum {WALK, IDLE} # Estados
+enum {WALK, IDLE, PLAYING} # Estados
 
-var enter_state = true
+var playing = false
 
 func _process(delta):
 	match current_state:
@@ -14,6 +14,9 @@ func _process(delta):
 			pass
 		IDLE:
 			_idle()
+			pass
+		PLAYING:
+			_play()
 			pass
 
 # Funções de estado
@@ -26,6 +29,10 @@ func _idle():
 	$anim.play('idle')
 	speed = Vector2(0,0)
 	_set_state(_check_idle_state())
+
+func _play():
+	
+	pass
 
 # Helpers
 func _move_and_slide():
@@ -40,19 +47,21 @@ func move():
 		$anim.play('up')
 
 func _set_state(new_state):
-	if new_state != current_state:
-		enter_state = true
 	current_state = new_state
 
 # Funções de checagem (O que pode tirar o player de tal estado?)
 func _check_idle_state():
 	var new_state = current_state
-	if Input.is_action_pressed("ui_up") or Input.is_action_pressed("ui_down"):
+	if playing:
+		new_state = PLAYING
+	elif (Input.is_action_pressed("ui_up") or Input.is_action_pressed("ui_down")) and !playing:
 		new_state = WALK
 	return new_state
 
 func _check_walk_state():
 	var new_state = current_state
-	if !Input.is_action_pressed("ui_up") && !Input.is_action_pressed("ui_down"):
+	if playing:
+		new_state = PLAYING
+	elif (!Input.is_action_pressed("ui_up") && !Input.is_action_pressed("ui_down")) and !playing:
 		new_state = IDLE
 	return new_state
