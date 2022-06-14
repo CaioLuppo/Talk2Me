@@ -13,7 +13,7 @@ func _ready():
 	pass
 
 func _process(delta):
-	if Input.is_action_just_pressed("ui_right"):
+	if Input.is_action_just_pressed("play"):
 		playing = true
 		current_state = PLAY
 	match current_state:
@@ -67,6 +67,8 @@ func check_play_state():
 	if (Input.is_action_pressed("ui_up") or Input.is_action_pressed("ui_down")) and !playing:
 		new_state = WALK
 	if Input.is_action_just_pressed("exit"):
+		instruments.canVerify = false
+		instruments.playing = false
 		new_state = IDLE
 	return new_state
 
