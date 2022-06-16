@@ -5,11 +5,17 @@ extends Node
 var volume = -10
 var playing = false
 
-# PADRÃO DE NOTAS:
-# C-0 CS-1 D-2 DS-3 etc.
+# Notas
+var noteList = [
+	"C1", "CS1", "D1", "DS1", "E1", "F1", "FS1", "G1", "GS1", "A1", "AS1", "B1", # Primeira oitava
+	"C2", "CS2", "D2", "DS2", "E2", "F2", "FS2", "G2", "GS2", "A2", "AS2", "B2" # Segunda oitava
+	]
+
+# Instrumentos
 var instrument = "clarinete"
-var instruments = {
+var instrumentNotes = {
 	"clarinete":[
+		# Primeira oitava
 		"res://src/instruments/Clarinete/C1.mp3", 
 		"res://src/instruments/Clarinete/CS1.mp3",
 		"res://src/instruments/Clarinete/D1.mp3",
@@ -21,31 +27,54 @@ var instruments = {
 		"res://src/instruments/Clarinete/GS1.mp3",
 		"res://src/instruments/Clarinete/A1.mp3",
 		"res://src/instruments/Clarinete/AS1.mp3",
-		"res://src/instruments/Clarinete/B1.mp3"
+		"res://src/instruments/Clarinete/B1.mp3",
+		# Segunda oitava
+		"res://src/instruments/Clarinete/C2.mp3", 
+		"res://src/instruments/Clarinete/CS2.mp3",
+		"res://src/instruments/Clarinete/D2.mp3",
+		"res://src/instruments/Clarinete/DS2.mp3",
+		"res://src/instruments/Clarinete/E2.mp3",
+		"res://src/instruments/Clarinete/F2.mp3",
+		"res://src/instruments/Clarinete/FS2.mp3",
+		"res://src/instruments/Clarinete/G2.mp3",
+		"res://src/instruments/Clarinete/GS2.mp3",
+		"res://src/instruments/Clarinete/A2.mp3",
+		"res://src/instruments/Clarinete/AS2.mp3",
+		"res://src/instruments/Clarinete/B2.mp3"
 		]}
+
+var windInstruments = ["clarinete", "flauta", "oboé", "trompete"]
+
+var tw = Tween.new()
 
 # Cria os nós que receberão o áudio de cada nota, isso permite tocar em conjunto
 func _ready():
+	
 	name = "notes"
-	if instrument != "clarinete":
-		for count in instruments[instrument].size():
-			var nota = AudioStreamPlayer2D.new()
-			nota.name = "note"+str(count)
-			nota.stream = load(instruments[instrument][count])
-			nota.volume_db = volume
-			add_child(nota, true)
-			var delay = Tween.new()
-			nota.add_child(delay, true)
-	else:
-		var nota = AudioStreamPlayer2D.new()
+	add_child(tw)
+	
+	if instrument in windInstruments:
+		var nota = AudioStreamPlayer.new()
 		nota.name = "note"
 		nota.volume_db = volume
+		nota.mix_target = 2
 		add_child(nota, true)
 		var delay = Tween.new()
 		nota.add_child(delay, true)
+	else:
+		for count in instrumentNotes[instrument].size():
+			var nota = AudioStreamPlayer.new()
+			nota.name = "note"+str(count)
+			nota.stream = load(instrumentNotes[instrument][count])
+			nota.volume_db = volume
+			nota.mix_target = 2
+			add_child(nota, true)
+			var delay = Tween.new()
+			nota.add_child(delay, true)
 
 # Função para tocar
 func play():
+	
 	# Animação
 	if playing:
 		$"../anim".play("clarinete")
@@ -53,53 +82,34 @@ func play():
 		$"../anim".play("idleClarinete")
 	
 	# Notas
-	if instrument == "clarinete":
+	if instrument in windInstruments:
 		playWindKey()
+		vibrato()
 	else:
-		playKey("C1", $note0)
-		playKey("CS1", $note1)
-		playKey("D1", $note2)
-		playKey("DS1", $note3)
-		playKey("E1", $note4)
-		playKey("F1", $note5)
-		playKey("FS1", $note6)
-		playKey("G1", $note7)
-		playKey("GS1", $note8)
-		playKey("A1", $note9)
-		playKey("AS1", $note10)
-		playKey("B1", $note11)
+		var count = 0
+		for key in noteList:
+			var nodeName = "note" + str(count)
+			var node = get_node(nodeName)
+			playKey(key, node)
+			count += 1
 
-var noteList = ["C1", "CS1", "D1", "DS1", "E1", "F1", "FS1", "G1", "GS1", "A1", "AS1", "B1"]
+# Funções específicas
 var canVerify = false
-
-func _process(delta):
-	if canVerify == true:
-		for id in noteList:
-			if Input.is_action_pressed(id):
-				playing = true 
+var lastnote
 
 func playKey(key : String, notenode : Node):
 	if Input.is_action_just_pressed(key):
 		onPressed(notenode)
 	elif Input.is_action_just_released(key):
 		onReleased(notenode)
+		for note in noteList: # Verifica se tem tecla sendo pressionada, para a animação
+			if Input.is_action_pressed(note):
+				playing = true
 
-# instrumento de sopro
-var lastnote
-func playWindKey():
+func playWindKey(): # Função para instrumentos de sopro
 	# Condições para as notas
-	windKey("A1")
-	windKey("AS1")
-	windKey("B1")
-	windKey("C1")
-	windKey("CS1")
-	windKey("D1")
-	windKey("DS1")
-	windKey("E1")
-	windKey("F1")
-	windKey("FS1")
-	windKey("G1")
-	windKey("GS1")
+	for key in noteList:
+		windKey(key)
 	
 	# Quando solta a nota, verifica se a nota que soltou é a certa
 	for note in noteList:
@@ -111,10 +121,24 @@ func playWindKey():
 func windKey(note:String):
 	var n = $note
 	if Input.is_action_just_pressed(note):
-		loadNote(instruments[instrument][noteList.find(note)])
+		loadNote(instrumentNotes[instrument][noteList.find(note)])
 		onPressed(n)
 		lastnote = note
 	pass
+
+var vibrating = false
+func vibrato():
+	# Aumenta e diminui o pitch/frequencia da nota caso o botão de vibrato seja pressionado
+	var no = $note
+	if Input.is_action_pressed("vibrato") && vibrating == false && playing:
+		tw.interpolate_property(no, "pitch_scale", 1, 1.015, 0.1, Tween.TRANS_LINEAR)
+		tw.start()
+		vibrating = true
+		yield(tw, "tween_completed")
+		tw.interpolate_property(no, "pitch_scale", 1.015, 1, 0.1, Tween.TRANS_LINEAR)
+		tw.start()
+		yield(tw, "tween_completed")
+		vibrating = false
 
 # Helpers
 func default(notenode):
