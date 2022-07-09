@@ -1,162 +1,160 @@
 extends Node
 
-# Esse script guarda as funções de tocar instrumentos
+################################################################################
+#                                                                              #
+#               SCRIPT DOS INSTRUMENTOS - BY: CAIO LUPPO RIBEIRO               #
+#                                                                              #
+################################################################################
 
-var volume = -10
-var playing = false
 
-# Notas
-var noteList = [
-	"C1", "CS1", "D1", "DS1", "E1", "F1", "FS1", "G1", "GS1", "A1", "AS1", "B1", # Primeira oitava
-	"C2", "CS2", "D2", "DS2", "E2", "F2", "FS2", "G2", "GS2", "A2", "AS2", "B2" # Segunda oitava
-	]
 
-# Instrumentos
-var instrument = "clarinete"
-var instrumentNotes = {
-	"clarinete":[
-		# Primeira oitava
-		"res://src/instruments/Clarinete/C1.mp3", 
-		"res://src/instruments/Clarinete/CS1.mp3",
-		"res://src/instruments/Clarinete/D1.mp3",
-		"res://src/instruments/Clarinete/DS1.mp3",
-		"res://src/instruments/Clarinete/E1.mp3",
-		"res://src/instruments/Clarinete/F1.mp3",
-		"res://src/instruments/Clarinete/FS1.mp3",
-		"res://src/instruments/Clarinete/G1.mp3",
-		"res://src/instruments/Clarinete/GS1.mp3",
-		"res://src/instruments/Clarinete/A1.mp3",
-		"res://src/instruments/Clarinete/AS1.mp3",
-		"res://src/instruments/Clarinete/B1.mp3",
-		# Segunda oitava
-		"res://src/instruments/Clarinete/C2.mp3", 
-		"res://src/instruments/Clarinete/CS2.mp3",
-		"res://src/instruments/Clarinete/D2.mp3",
-		"res://src/instruments/Clarinete/DS2.mp3",
-		"res://src/instruments/Clarinete/E2.mp3",
-		"res://src/instruments/Clarinete/F2.mp3",
-		"res://src/instruments/Clarinete/FS2.mp3",
-		"res://src/instruments/Clarinete/G2.mp3",
-		"res://src/instruments/Clarinete/GS2.mp3",
-		"res://src/instruments/Clarinete/A2.mp3",
-		"res://src/instruments/Clarinete/AS2.mp3",
-		"res://src/instruments/Clarinete/B2.mp3"
-		]}
+# ---------------------------- Variáveis Genéricas -----------------------------
 
-var windInstruments = ["clarinete", "flauta", "oboé", "trompete"]
+# Objetos instanciados:
 
 var tw = Tween.new()
+var timer = Timer.new()
+var noteNode
 
-# Cria os nós que receberão o áudio de cada nota, isso permite tocar em conjunto
-func _ready():
-	
-	name = "notes"
-	add_child(tw)
-	
-	if instrument in windInstruments:
-		var nota = AudioStreamPlayer.new()
-		nota.name = "note"
-		nota.volume_db = volume
-		nota.mix_target = 2
-		add_child(nota, true)
-		var delay = Tween.new()
-		nota.add_child(delay, true)
-	else:
-		for count in instrumentNotes[instrument].size():
-			var nota = AudioStreamPlayer.new()
-			nota.name = "note"+str(count)
-			nota.stream = load(instrumentNotes[instrument][count])
-			nota.volume_db = volume
-			nota.mix_target = 2
-			add_child(nota, true)
-			var delay = Tween.new()
-			nota.add_child(delay, true)
+# Configurações dos Audio Buses:
 
-# Função para tocar
-func play():
+var instBusPitchEffect = AudioServer.get_bus_effect(1, 0)
+var originalBusPitch = instBusPitchEffect.get("pitch_scale")
+
+
+
+# ----------------------------- Funções Principais -----------------------------
+
+var volume = -20
+var playing = false
+
+var intervals = {
+	"C" : 1,
+	"CS" : 2,
+	"D" : 3,
+	"DS" : 4,
+	"E" : 5,
+	"F" : 6,
+	"FS" : 7,
+	"G" : 8,
+	"GS" : 9,
+	"A" : 10,
+	"AS" : 11,
+	"B" : 12 }
+var instrument = "clarinet"
+var windInsts = ["clarinet"]
+var stringInsts = ["piano"]
+
+var isWind = instrument in windInsts
+var isString = instrument in stringInsts
+
+
+func _ready():  # Função executada assim que é isntanciado
+	
+	timer.connect("timeout", self, "_windTimeout")  # Conecta o timer
+	
+	add_child(tw)  # Adiciona o nó do Tween na cena, como filho do nó atual
+	
+	if isWind:
+		var noteNodeInst = AudioStreamPlayer.new()
+		noteNodeInst.mix_target = 2  # Seta o alvo do som para "center"
+		noteNodeInst.name = "noteNode"  # Define o nome do nó
+		noteNodeInst.volume_db = volume  # Define o volume dos intrumentos
+		add_child(noteNodeInst)  # Adiciona o nó na cena
+		noteNode = $noteNode
+		timer.name = "LigatoTimer"
+		add_child(timer)  # Timer que será utilizado para o "ligato"
+		
+	elif isString:
+		
+		pass
+	
+	noteNode.bus = "Instruments"  # Define por que ônibus o áudio sairá
+	
+	pass
+
+func play():  # Função mestre que executa as outras e faz distinção
 	
 	# Animação
 	if playing:
-		$"../anim".play("clarinete")
+		$"../anim".play("clarinet")
 	else:
-		$"../anim".play("idleClarinete")
+		$"../anim".play("idleClarinet")
 	
-	# Notas
-	if instrument in windInstruments:
-		playWindKey()
+	# Funções para tocar em si
+	if isWind:
+		checkTimeOut()
+		wind()
 		vibrato()
-	else:
-		var count = 0
-		for key in noteList:
-			var nodeName = "note" + str(count)
-			var node = get_node(nodeName)
-			playKey(key, node)
-			count += 1
-
-# Funções específicas
-var canVerify = false
-var lastnote
-
-func playKey(key : String, notenode : Node):
-	if Input.is_action_just_pressed(key):
-		onPressed(notenode)
-	elif Input.is_action_just_released(key):
-		onReleased(notenode)
-		for note in noteList: # Verifica se tem tecla sendo pressionada, para a animação
-			if Input.is_action_pressed(note):
-				playing = true
-
-func playWindKey(): # Função para instrumentos de sopro
-	# Condições para as notas
-	for key in noteList:
-		windKey(key)
+	elif isString:
+		pass
 	
-	# Quando solta a nota, verifica se a nota que soltou é a certa
-	for note in noteList:
-		if Input.is_action_just_released(note) && lastnote == note:
-			onReleased($note)
 	
 	pass
 
-func windKey(note:String):
-	var n = $note
-	if Input.is_action_just_pressed(note):
-		loadNote(instrumentNotes[instrument][noteList.find(note)])
-		onPressed(n)
-		lastnote = note
-	pass
 
+
+# --------------------------- Instrumentos de Sopro ----------------------------
+
+var timeout = false
+var lastNotePlayed
 var vibrating = false
-func vibrato():
+
+
+func wind():  # Função para tocar as notas dos instrumentos de sopro
+	for octave in range(1, 4):
+		for note in intervals:
+			if Input.is_action_just_pressed(note+str(octave)):
+				noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octave)+".mp3")
+				noteNode.pitch_scale = pitchGuess(intervals[note] - 1)
+				if timeout:
+					noteNode.play()
+				elif !timeout or playing:
+					if instrument == "clarinete" && octave == 1:
+						noteNode.play(.12)
+					else:
+						noteNode.play(.07)
+				playing = true
+				lastNotePlayed = note+str(octave)
+			if Input.is_action_just_released(note+str(octave)):
+				timeout = false
+				timer.wait_time = 0.4
+				timer.start()
+				if lastNotePlayed == note+str(octave):
+					noteNode.stop()
+					playing = false
+
+func _windTimeout():  # Quando o timer do wind terminar
+	timeout = true
+	pass
+
+func vibrato():  # Funcão para o vibrato
+	
 	# Aumenta e diminui o pitch/frequencia da nota caso o botão de vibrato seja pressionado
-	var no = $note
+	
 	if Input.is_action_pressed("vibrato") && vibrating == false && playing:
-		tw.interpolate_property(no, "pitch_scale", 1, 1.015, 0.1, Tween.TRANS_LINEAR)
+		
+		# Esta parte aumenta o pitch
+		tw.interpolate_property(instBusPitchEffect, "pitch_scale", originalBusPitch, originalBusPitch + (0.0295 * 0.3), 0.12, Tween.TRANS_LINEAR)
 		tw.start()
 		vibrating = true
+		
+		# Esta parte diminui o pitch
 		yield(tw, "tween_completed")
-		tw.interpolate_property(no, "pitch_scale", 1.015, 1, 0.1, Tween.TRANS_LINEAR)
+		tw.interpolate_property(instBusPitchEffect, "pitch_scale", instBusPitchEffect.get("pitch_scale"), originalBusPitch, 0.1, Tween.TRANS_LINEAR)
 		tw.start()
+		
+		# Esta parte permite a reexecução do vibrato, após terminar de "vibrar"
 		yield(tw, "tween_completed")
 		vibrating = false
 
-# Helpers
-func default(notenode):
-	notenode.volume_db = volume
 
-func onPressed(notenode):
-	var delay = notenode.get_child(0)
-	canVerify = true
-	delay.stop(notenode, "volume_db")
-	default(notenode)
-	notenode.play()
-	playing = true
 
-func onReleased(notenode):
-	var delay = notenode.get_child(0)
-	delay.interpolate_property(notenode, "volume_db", volume, -80, 1, Tween.TRANS_LINEAR)
-	delay.start()
-	playing = false
+# ----------------------------- Funções auxiliares -----------------------------
 
-func loadNote(path):
-	$note.stream = load(path)
+func checkTimeOut():  # Função que garante que o nó pare de tocar
+	if !timeout && !playing:
+		noteNode.stop()
+
+func pitchGuess(semitone):  # Função para calcular o pitch da nota
+	return pow(2.0, float(float(semitone)/12.0))

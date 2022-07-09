@@ -3,13 +3,15 @@ extends KinematicBody2D
 var speed = Vector2()
 var instruments = load("res://scripts/instruments.gd").new()
 
+var added = false
+
 var current_state := 0 # Estado atual
 enum {WALK, IDLE, PLAY} # Estados
 
 var playing = false
 
 func _ready():
-	add_child(instruments, true)
+	instruments.name = "notes"
 	pass
 
 func _process(delta):
@@ -40,11 +42,16 @@ func idle():
 	speed = Vector2(0,0)
 	set_state(check_idle_state())
 
-var instrument = load("res://scripts/instruments.gd").new()
 func playInstrument():
+
+	if added == false:
+		added = true
+		add_child(instruments)
+	
 	playing = true
 	instruments.play()
 	set_state(check_play_state())
+
 
 # Helpers
 func _move_and_slide():
@@ -61,14 +68,16 @@ func move():
 func set_state(new_state):
 	current_state = new_state
 
+
 # Funções de checagem (O que pode tirar o player de tal estado?)
 func check_play_state():
 	var new_state = current_state
 	if (Input.is_action_pressed("ui_up") or Input.is_action_pressed("ui_down")) and !playing:
 		new_state = WALK
 	if Input.is_action_just_pressed("exit"):
-		instruments.canVerify = false
 		instruments.playing = false
+		added = false
+		remove_child($notes)
 		new_state = IDLE
 	return new_state
 

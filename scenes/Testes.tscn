@@ -46,13 +46,13 @@ region = Rect2( 0, 0, 36, 37 )
 atlas = ExtResource( 3 )
 region = Rect2( 36, 0, 36, 37 )
 
-[sub_resource type="AtlasTexture" id=40]
+[sub_resource type="AtlasTexture" id=38]
 atlas = ExtResource( 5 )
-region = Rect2( 72, 0, 36, 37 )
+region = Rect2( 0, 0, 36, 37 )
 
-[sub_resource type="AtlasTexture" id=41]
+[sub_resource type="AtlasTexture" id=39]
 atlas = ExtResource( 5 )
-region = Rect2( 108, 0, 36, 37 )
+region = Rect2( 36, 0, 36, 37 )
 
 [sub_resource type="AtlasTexture" id=22]
 atlas = ExtResource( 1 )
@@ -86,13 +86,13 @@ region = Rect2( 252, 0, 36, 37 )
 atlas = ExtResource( 1 )
 region = Rect2( 0, 0, 36, 37 )
 
-[sub_resource type="AtlasTexture" id=38]
+[sub_resource type="AtlasTexture" id=40]
 atlas = ExtResource( 5 )
-region = Rect2( 0, 0, 36, 37 )
+region = Rect2( 72, 0, 36, 37 )
 
-[sub_resource type="AtlasTexture" id=39]
+[sub_resource type="AtlasTexture" id=41]
 atlas = ExtResource( 5 )
-region = Rect2( 36, 0, 36, 37 )
+region = Rect2( 108, 0, 36, 37 )
 
 [sub_resource type="SpriteFrames" id=9]
 animations = [ {
@@ -106,20 +106,20 @@ animations = [ {
 "name": "idle",
 "speed": 4.0
 }, {
-"frames": [ SubResource( 40 ), SubResource( 41 ) ],
+"frames": [ SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 39 ) ],
 "loop": true,
-"name": "clarinete",
-"speed": 2.0
+"name": "idleClarinet",
+"speed": 4.0
 }, {
 "frames": [ SubResource( 22 ), SubResource( 23 ), SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ) ],
 "loop": true,
 "name": "down",
 "speed": 8.0
 }, {
-"frames": [ SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 39 ) ],
+"frames": [ SubResource( 40 ), SubResource( 41 ) ],
 "loop": true,
-"name": "idleClarinete",
-"speed": 4.0
+"name": "clarinet",
+"speed": 2.0
 } ]
 
 [sub_resource type="CapsuleShape2D" id=10]
@@ -135,7 +135,7 @@ script = ExtResource( 2 )
 [node name="anim" type="AnimatedSprite" parent="Player"]
 scale = Vector2( 5, 5 )
 frames = SubResource( 9 )
-animation = "down"
+animation = "idleClarinet"
 
 [node name="colisor" type="CollisionShape2D" parent="Player"]
 shape = SubResource( 10 )
