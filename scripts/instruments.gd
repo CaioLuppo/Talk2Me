@@ -25,24 +25,25 @@ var originalBusPitch = instBusPitchEffect.get("pitch_scale")
 
 # ----------------------------- Funções Principais -----------------------------
 
-var volume = -20
+var volumeSetted = 0
+var volume = volumeSetted
 var playing = false
 
 var intervals = {
-	"C" : 1,
-	"CS" : 2,
-	"D" : 3,
-	"DS" : 4,
-	"E" : 5,
-	"F" : 6,
-	"FS" : 7,
-	"G" : 8,
-	"GS" : 9,
-	"A" : 10,
-	"AS" : 11,
-	"B" : 12 }
-var instrument = "clarinet"
-var windInsts = ["clarinet"]
+	"C" : 0,
+	"CS" : 1,
+	"D" : 2,
+	"DS" : 3,
+	"E" : 4,
+	"F" : 5,
+	"FS" : 6,
+	"G" : 7,
+	"GS" : 8,
+	"A" : 9,
+	"AS" : 10,
+	"B" : 11 }
+var instrument = "flute"
+var windInsts = ["clarinet", "oboe", "trumpet", "flute"]
 var stringInsts = ["piano"]
 
 var isWind = instrument in windInsts
@@ -75,6 +76,8 @@ func _ready():  # Função executada assim que é isntanciado
 
 func play():  # Função mestre que executa as outras e faz distinção
 	
+	noteNode.volume_db = volume
+	
 	# Animação
 	if playing:
 		$"../anim".play("clarinet")
@@ -102,24 +105,34 @@ var vibrating = false
 
 
 func wind():  # Função para tocar as notas dos instrumentos de sopro
-	for octave in range(1, 4):
+	for octave in range(1, 5):
+		
 		for note in intervals:
+			
+			if octave == 4 && !(note+str(octave) == "C4"):
+				continue  # Pois não existem outras notas além dessa na quarta oitava
+			
 			if Input.is_action_just_pressed(note+str(octave)):
+				
 				noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octave)+".mp3")
-				noteNode.pitch_scale = pitchGuess(intervals[note] - 1)
-				if timeout:
-					noteNode.play()
-				elif !timeout or playing:
-					if instrument == "clarinete" && octave == 1:
-						noteNode.play(.12)
-					else:
-						noteNode.play(.07)
+				noteNode.pitch_scale = pitchGuess(intervals[note])
+				
+				fixFlute(intervals, note, octave)
+				
+				fixPlay("flute", 0, 0.05, 0)
+				fixPlay("clarinet", 0, .02, 0)
+				fixPlay("oboe", 0 , 0.06, 0)
+				fixPlay("trumpet", 0, 0.01, 0)
+				
 				playing = true
 				lastNotePlayed = note+str(octave)
+				
 			if Input.is_action_just_released(note+str(octave)):
+				
 				timeout = false
 				timer.wait_time = 0.4
 				timer.start()
+				
 				if lastNotePlayed == note+str(octave):
 					noteNode.stop()
 					playing = false
@@ -158,3 +171,25 @@ func checkTimeOut():  # Função que garante que o nó pare de tocar
 
 func pitchGuess(semitone):  # Função para calcular o pitch da nota
 	return pow(2.0, float(float(semitone)/12.0))
+
+# ----------------------------------- Fixes ------------------------------------
+
+func fixPlay(instrumentName : String, normalPlay : float, timeoutPlay : float, volumeFix : float):
+	
+	if instrumentName == instrument: 
+		if timeout:
+			noteNode.play(normalPlay)
+		elif !timeout || playing:
+			noteNode.play(timeoutPlay)
+	
+	noteNode.volume_db = volumeSetted + volumeFix
+	
+	pass
+
+func fixFlute(intervals, note, octave):
+	if instrument == "flute" && octave == 4:
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C3.mp3")
+		noteNode.pitch_scale = pitchGuess(intervals[note] + 12)
+	elif instrument == "flute" && octave == 1:
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C2.mp3")
+		noteNode.pitch_scale = pitchGuess(intervals[note] - 12)

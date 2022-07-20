@@ -47,6 +47,9 @@ func playInstrument():
 	if added == false:
 		added = true
 		add_child(instruments)
+	$"../Button".disabled = false
+	$"../Button2".disabled = false
+	$"../Button3".disabled = false
 	
 	playing = true
 	instruments.play()
@@ -78,6 +81,9 @@ func check_play_state():
 		instruments.playing = false
 		added = false
 		remove_child($notes)
+		$"../Button".disabled = true
+		$"../Button2".disabled = true
+		$"../Button3".disabled = true
 		new_state = IDLE
 	return new_state
 
