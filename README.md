@@ -4,6 +4,4 @@ O jogo e sua ideia ainda estão em desenvolvimento. Entretanto, está cosntantem
 
 ### Última atualização:
 
->Adicionado mecânica de instrumentos:
->  - Clarinete
->  - Vibrato (técnica)
+>Sistema de notas modificado para pitch, agora não precisa mais de tanto arquivo de música
