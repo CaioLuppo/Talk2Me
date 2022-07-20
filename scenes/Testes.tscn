@@ -1,14 +1,11 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=31 format=2]
 
 [ext_resource path="res://src/images/Feminino/Feminino_walk.png" type="Texture" id=1]
 [ext_resource path="res://scripts/Player.gd" type="Script" id=2]
 [ext_resource path="res://src/images/Feminino/Feminino_idle.png" type="Texture" id=3]
 [ext_resource path="res://src/images/Feminino/Feminino_walk_back.png" type="Texture" id=4]
 [ext_resource path="res://src/images/Feminino/Feminino_clarinete.png" type="Texture" id=5]
-[ext_resource path="res://Button2.gd" type="Script" id=6]
-[ext_resource path="res://Button.gd" type="Script" id=7]
-[ext_resource path="res://scenes/noteButt.gd" type="Script" id=8]
-[ext_resource path="res://scenes/Button3.gd" type="Script" id=9]
+[ext_resource path="res://testing/changeInstrument.gd" type="Script" id=6]
 
 [sub_resource type="AtlasTexture" id=30]
 atlas = ExtResource( 4 )
@@ -50,14 +47,6 @@ region = Rect2( 0, 0, 36, 37 )
 atlas = ExtResource( 3 )
 region = Rect2( 36, 0, 36, 37 )
 
-[sub_resource type="AtlasTexture" id=40]
-atlas = ExtResource( 5 )
-region = Rect2( 72, 0, 36, 37 )
-
-[sub_resource type="AtlasTexture" id=41]
-atlas = ExtResource( 5 )
-region = Rect2( 108, 0, 36, 37 )
-
 [sub_resource type="AtlasTexture" id=38]
 atlas = ExtResource( 5 )
 region = Rect2( 0, 0, 36, 37 )
@@ -65,6 +54,14 @@ region = Rect2( 0, 0, 36, 37 )
 [sub_resource type="AtlasTexture" id=39]
 atlas = ExtResource( 5 )
 region = Rect2( 36, 0, 36, 37 )
+
+[sub_resource type="AtlasTexture" id=40]
+atlas = ExtResource( 5 )
+region = Rect2( 72, 0, 36, 37 )
+
+[sub_resource type="AtlasTexture" id=41]
+atlas = ExtResource( 5 )
+region = Rect2( 108, 0, 36, 37 )
 
 [sub_resource type="AtlasTexture" id=22]
 atlas = ExtResource( 1 )
@@ -110,15 +107,15 @@ animations = [ {
 "name": "idle",
 "speed": 4.0
 }, {
-"frames": [ SubResource( 40 ), SubResource( 41 ) ],
-"loop": true,
-"name": "clarinet",
-"speed": 2.0
-}, {
 "frames": [ SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 38 ), SubResource( 39 ) ],
 "loop": true,
 "name": "idleClarinet",
 "speed": 4.0
+}, {
+"frames": [ SubResource( 40 ), SubResource( 41 ) ],
+"loop": true,
+"name": "clarinet",
+"speed": 2.0
 }, {
 "frames": [ SubResource( 22 ), SubResource( 23 ), SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ) ],
 "loop": true,
@@ -129,10 +126,6 @@ animations = [ {
 [sub_resource type="CapsuleShape2D" id=10]
 radius = 39.25
 height = 96.0
-
-[sub_resource type="NoiseTexture" id=42]
-
-[sub_resource type="NoiseTexture" id=43]
 
 [node name="Testes" type="Node2D"]
 
@@ -148,33 +141,6 @@ animation = "idleClarinet"
 [node name="colisor" type="CollisionShape2D" parent="Player"]
 shape = SubResource( 10 )
 
-[node name="Button" type="Button" parent="."]
-margin_left = 202.0
-margin_top = 178.0
-margin_right = 324.0
-margin_bottom = 235.0
-disabled = true
-text = "CLARINETE"
-script = ExtResource( 7 )
-
-[node name="Button2" type="Button" parent="."]
-margin_left = 202.0
-margin_top = 251.0
-margin_right = 324.0
-margin_bottom = 308.0
-disabled = true
-text = "OBOE"
-script = ExtResource( 6 )
-
-[node name="Button3" type="Button" parent="."]
-margin_left = 202.0
-margin_top = 106.0
-margin_right = 324.0
-margin_bottom = 163.0
-disabled = true
-text = "FLUTE"
-script = ExtResource( 9 )
-
 [node name="Label" type="Label" parent="."]
 margin_left = 607.0
 margin_top = 177.0
@@ -182,51 +148,39 @@ margin_right = 729.0
 margin_bottom = 213.0
 text = "Aperte P para tocar"
 
-[node name="Control" type="Control" parent="."]
-margin_left = 865.0
+[node name="instruments" type="Control" parent="."]
+margin_left = 181.0
+margin_top = 145.0
+margin_right = 359.0
+margin_bottom = 457.0
+
+[node name="oboe" type="Button" parent="instruments"]
+margin_left = 32.0
 margin_top = 128.0
-margin_right = 1321.0
-margin_bottom = 512.0
+margin_right = 154.0
+margin_bottom = 185.0
+disabled = true
+text = "OBOE"
+script = ExtResource( 6 )
 
-[node name="p" type="Button" parent="Control"]
-margin_left = 2.0
-margin_top = 270.5
-margin_right = 51.0
-margin_bottom = 317.5
-rect_scale = Vector2( 1.5, 1.5 )
-text = "p"
+[node name="trumpet" type="Button" parent="instruments"]
+margin_left = 32.0
+margin_top = 201.0
+margin_right = 154.0
+margin_bottom = 258.0
+disabled = true
+text = "TRUMPET"
+script = ExtResource( 6 )
 
-[node name="C2" type="TouchScreenButton" parent="Control"]
-scale = Vector2( 0.15, 0.15 )
-normal = SubResource( 42 )
-script = ExtResource( 8 )
+[node name="flute" type="Button" parent="instruments"]
+margin_left = 32.0
+margin_top = 56.0
+margin_right = 154.0
+margin_bottom = 113.0
+disabled = true
+text = "FLUTE"
+script = ExtResource( 6 )
 
-[node name="D2" type="TouchScreenButton" parent="Control"]
-position = Vector2( 0, 90 )
-scale = Vector2( 0.15, 0.15 )
-normal = SubResource( 42 )
-script = ExtResource( 8 )
-
-[node name="E2" type="TouchScreenButton" parent="Control"]
-position = Vector2( 0, 180 )
-scale = Vector2( 0.15, 0.15 )
-normal = SubResource( 42 )
-script = ExtResource( 8 )
-
-[node name="vibrato" type="TouchScreenButton" parent="Control"]
-position = Vector2( -647, 227 )
-scale = Vector2( 0.1875, 0.1875 )
-normal = SubResource( 43 )
-
-[connection signal="button_up" from="Button" to="Button" method="_on_Button_button_up"]
-[connection signal="button_up" from="Button2" to="Button2" method="_on_Button2_button_up"]
-[connection signal="button_down" from="Button3" to="Button3" method="_on_Button3_button_down"]
-[connection signal="button_down" from="Control/p" to="Control/C2" method="_on_p_button_down"]
-[connection signal="pressed" from="Control/C2" to="Control/C2" method="_on_button_down"]
-[connection signal="released" from="Control/C2" to="Control/C2" method="_on_button_up"]
-[connection signal="pressed" from="Control/D2" to="Control/D2" method="_on_button_down"]
-[connection signal="released" from="Control/D2" to="Control/D2" method="_on_button_up"]
-[connection signal="pressed" from="Control/E2" to="Control/E2" method="_on_button_down"]
-[connection signal="released" from="Control/E2" to="Control/E2" method="_on_button_up"]
-[connection signal="pressed" from="Control/vibrato" to="Control/E2" method="_on_vibrato_button_down"]
-[connection signal="released" from="Control/vibrato" to="Control/E2" method="_on_vibrato_button_up"]
+[connection signal="button_down" from="instruments/oboe" to="instruments/oboe" method="_down"]
+[connection signal="button_down" from="instruments/trumpet" to="instruments/trumpet" method="_down"]
+[connection signal="button_down" from="instruments/flute" to="instruments/flute" method="_down"]

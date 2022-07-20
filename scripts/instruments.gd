@@ -103,6 +103,7 @@ var timeout = false
 var lastNotePlayed
 var vibrating = false
 
+var fixeds = ["flute", "oboe", "trumpet"]
 
 func wind():  # Função para tocar as notas dos instrumentos de sopro
 	for octave in range(1, 5):
@@ -114,15 +115,18 @@ func wind():  # Função para tocar as notas dos instrumentos de sopro
 			
 			if Input.is_action_just_pressed(note+str(octave)):
 				
-				noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octave)+".mp3")
-				noteNode.pitch_scale = pitchGuess(intervals[note])
-				
-				fixFlute(intervals, note, octave)
+				if instrument in fixeds:
+					fixFlute(intervals, note, octave)
+					fixOboe(intervals, note, octave)
+					fixTrumpet(intervals, note, octave)
+				else:
+					noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octave)+".mp3")
+					noteNode.pitch_scale = pitchGuess(intervals[note])
 				
 				fixPlay("flute", 0, 0.05, 0)
 				fixPlay("clarinet", 0, .02, 0)
-				fixPlay("oboe", 0 , 0.06, 0)
-				fixPlay("trumpet", 0, 0.01, 0)
+				fixPlay("oboe", 0 , 0.06, 0, note, octave)
+				fixPlay("trumpet", 0, 0.02, 0)
 				
 				playing = true
 				lastNotePlayed = note+str(octave)
@@ -174,22 +178,59 @@ func pitchGuess(semitone):  # Função para calcular o pitch da nota
 
 # ----------------------------------- Fixes ------------------------------------
 
-func fixPlay(instrumentName : String, normalPlay : float, timeoutPlay : float, volumeFix : float):
+func fixPlay(instrumentName : String, normalPlay : float, timeoutPlay : float, volumeFix : float, note := "", octave = ""):
 	
-	if instrumentName == instrument: 
-		if timeout:
+	# -- oboe fix
+	if (instrument == "oboe") && (note+str(octave) in ["A3", "AS3", "B3", "C4"]):
+		if timeout and !playing:
 			noteNode.play(normalPlay)
-		elif !timeout || playing:
+		elif !timeout or playing:
+			noteNode.play(0.05)
+	
+	# -- general play
+	elif instrumentName == instrument: 
+		if timeout and !playing:
+			noteNode.play(normalPlay)
+		elif !timeout or playing:
 			noteNode.play(timeoutPlay)
 	
 	noteNode.volume_db = volumeSetted + volumeFix
 	
 	pass
 
-func fixFlute(intervals, note, octave):
-	if instrument == "flute" && octave == 4:
+func fixFlute(intervalsToFix, noteToFix, octaveToFix):
+	if instrument == "flute" && octaveToFix == 4:
 		noteNode.stream = load("res://src/instruments/"+instrument+"/C3.mp3")
-		noteNode.pitch_scale = pitchGuess(intervals[note] + 12)
-	elif instrument == "flute" && octave == 1:
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix] + 12)
+	elif instrument == "flute" && octaveToFix == 1:
 		noteNode.stream = load("res://src/instruments/"+instrument+"/C2.mp3")
-		noteNode.pitch_scale = pitchGuess(intervals[note] - 12)
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix] - 12)
+	elif instrument == "flute":
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octaveToFix)+".mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix])
+
+func fixOboe(intervalsToFix, noteToFix, octaveToFix):
+	
+	if instrument == "oboe" && octaveToFix == 2 && noteToFix+str(octaveToFix) in ["AS2", "B2"]:
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C3.mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix] - 12)
+	
+	elif instrument == "oboe" && octaveToFix == 3 && noteToFix+str(octaveToFix) in ["A3", "AS3", "B3"]:
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C4.mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix] - 12)
+	
+	elif instrument == "oboe":
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octaveToFix)+".mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix])
+
+func fixTrumpet(intervalsToFix, noteToFix, octaveToFix):
+	
+	if instrument == "trumpet" && octaveToFix == 4:
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C3.mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix] + 12)
+
+	elif instrument == "trumpet":
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octaveToFix)+".mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix])
+	
+	pass
