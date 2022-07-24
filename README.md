@@ -1,6 +1,6 @@
 # Talk2Me
 
-O jogo e sua ideia ainda estão em desenvolvimento. Entretanto, está cosntantemente sendo atualizado! 😊
+O jogo e sua ideia ainda estão em desenvolvimento. Entretanto, está constantemente sendo atualizado! 😊
 
 ### Última atualização:
 
