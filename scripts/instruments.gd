@@ -14,7 +14,7 @@ extends Node
 
 var tw = Tween.new()
 var timer = Timer.new()
-var noteNode
+
 
 # Configurações dos Audio Buses:
 
@@ -42,7 +42,7 @@ var intervals = {
 	"A" : 9,
 	"AS" : 10,
 	"B" : 11 }
-var instrument = "flute"
+var instrument = "piano"
 var windInsts = ["clarinet", "oboe", "trumpet", "flute"]
 var stringInsts = ["piano"]
 
@@ -53,30 +53,16 @@ var isString = instrument in stringInsts
 func _ready():  # Função executada assim que é isntanciado
 	
 	timer.connect("timeout", self, "_windTimeout")  # Conecta o timer
-	
 	add_child(tw)  # Adiciona o nó do Tween na cena, como filho do nó atual
 	
 	if isWind:
-		var noteNodeInst = AudioStreamPlayer.new()
-		noteNodeInst.mix_target = 2  # Seta o alvo do som para "center"
-		noteNodeInst.name = "noteNode"  # Define o nome do nó
-		noteNodeInst.volume_db = volume  # Define o volume dos intrumentos
-		add_child(noteNodeInst)  # Adiciona o nó na cena
-		noteNode = $noteNode
-		timer.name = "LigatoTimer"
-		add_child(timer)  # Timer que será utilizado para o "ligato"
-		
+		_addWind()
 	elif isString:
-		
-		pass
-	
-	noteNode.bus = "Instruments"  # Define por que ônibus o áudio sairá
+		_addString()
 	
 	pass
 
 func play():  # Função mestre que executa as outras e faz distinção
-	
-	noteNode.volume_db = volume
 	
 	# Animação
 	if playing:
@@ -97,25 +83,46 @@ func play():  # Função mestre que executa as outras e faz distinção
 
 
 
+# --------------------------- Instrumentos de Corda ----------------------------
+
+
+
+func _addString():
+	for octave in range(1, 5):
+		for note in intervals:
+			if octave == 4 and note+str(octave) != "C4":
+				break
+			else:
+				var strNode = AudioStreamPlayer.new() # Instância do nó
+				
+				strNode.mix_target = 2  # Seta o alvo do som para "center"
+				strNode.name = note+str(octave)  # Define o nome do nó
+				strNode.volume_db = volume  # Define o volume dos intrumentos
+				
+				add_child(strNode) # Adiciona o nó na cena
+	pass
+
+
+
 # --------------------------- Instrumentos de Sopro ----------------------------
 
+var noteNode
 var timeout = false
 var lastNotePlayed
 var vibrating = false
 
-var fixeds = ["flute", "oboe", "trumpet"]
+var fixeds = ["flute", "oboe", "trumpet", "clarinet"]
 
 func wind():  # Função para tocar as notas dos instrumentos de sopro
 	for octave in range(1, 5):
-		
 		for note in intervals:
-			
 			if octave == 4 && !(note+str(octave) == "C4"):
 				continue  # Pois não existem outras notas além dessa na quarta oitava
 			
 			if Input.is_action_just_pressed(note+str(octave)):
 				
 				if instrument in fixeds:
+					fixClarinet(intervals, note, octave)
 					fixFlute(intervals, note, octave)
 					fixOboe(intervals, note, octave)
 					fixTrumpet(intervals, note, octave)
@@ -164,6 +171,18 @@ func vibrato():  # Funcão para o vibrato
 		# Esta parte permite a reexecução do vibrato, após terminar de "vibrar"
 		yield(tw, "tween_completed")
 		vibrating = false
+
+func _addWind():
+	var noteNodeInst = AudioStreamPlayer.new()
+	noteNodeInst.mix_target = 2  # Seta o alvo do som para "center"
+	noteNodeInst.name = "noteNode"  # Define o nome do nó
+	noteNodeInst.volume_db = volume  # Define o volume dos intrumentos
+	noteNodeInst.bus = "Instruments"  # Define por que ônibus o áudio sairá
+	add_child(noteNodeInst)  # Adiciona o nó na cena
+	noteNode = $noteNode
+	timer.name = "LigatoTimer"
+	add_child(timer)  # Timer que será utilizado para o "ligato"
+	pass
 
 
 
@@ -237,3 +256,14 @@ func fixTrumpet(intervalsToFix, noteToFix, octaveToFix):
 	
 	pass
 
+func fixClarinet(intervalsToFix, noteToFix, octaveToFix):
+	
+	if instrument == "clarinet" && octaveToFix == 4:
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C3.mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix] + 12)
+		
+	elif instrument == "clarinet":
+		noteNode.stream = load("res://src/instruments/"+instrument+"/C"+str(octaveToFix)+".mp3")
+		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix])
+		
+	pass
