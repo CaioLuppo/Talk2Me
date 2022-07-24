@@ -176,6 +176,8 @@ func checkTimeOut():  # Função que garante que o nó pare de tocar
 func pitchGuess(semitone):  # Função para calcular o pitch da nota
 	return pow(2.0, float(float(semitone)/12.0))
 
+
+
 # ----------------------------------- Fixes ------------------------------------
 
 func fixPlay(instrumentName : String, normalPlay : float, timeoutPlay : float, volumeFix : float, note := "", octave = ""):
@@ -234,3 +236,4 @@ func fixTrumpet(intervalsToFix, noteToFix, octaveToFix):
 		noteNode.pitch_scale = pitchGuess(intervalsToFix[noteToFix])
 	
 	pass
+
